@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import korali
-import numpy as np
-
 
 def rosenbrock(x, y):
     """
@@ -16,13 +14,13 @@ def rosenbrock(x, y):
 
 if __name__ == '__main__':
 
-    # The optimization problem is configures into a
-    # korali Experiment object
+    # The optimization problem is described in a korali Experiment object
     e = korali.Experiment()
 
     # Korali requires a specific interface for the function to maximize
     def objective_function(ksample):
         x, y = ksample["Parameters"]
+        # note the minus sign because we want to minimize the Rosenbrock function
         ksample["F(x)"] = -rosenbrock(x, y)
 
     e["Problem"]["Type"] = "Optimization"
