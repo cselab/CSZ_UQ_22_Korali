@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 
 import json
+import korali
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
-from scipy.stats import norm
 
-def get_korali_samples(filename):
+def get_samples_posterior(filename):
     a = []
     b = []
     sigma = []
-
     with open(filename) as f:
         doc = json.load(f)
 
@@ -19,37 +18,75 @@ def get_korali_samples(filename):
             a.append(sample[0])
             b.append(sample[1])
             sigma.append(sample[2])
+    return a, b, sigma
 
-    return np.array(a), np.array(b), np.array(sigma)
+def generate_samples_xy():
+    a, b, sigma = get_samples_posterior(os.path.join("_korali_result", "latest"))
+    num_x = 100
+    x = np.linspace(-1, 1, num_x)
+
+    def model(ks):
+        a, b, sigma = ks["Parameters"]
+        ks["sigma"] = sigma # Store
+        #ks["X"] = x.tolist()
+        ks["Evaluations"] = (a * x + b).tolist()
+
+    e = korali.Experiment()
+    e['Problem']['Type'] = 'Propagation'
+    e['Problem']['Execution Model'] = model
+
+    e['Variables'][0]['Name'] = 'a'
+    e['Variables'][0]['Precomputed Values'] = a
+    e['Variables'][1]['Name'] = 'b'
+    e['Variables'][1]['Precomputed Values'] = b
+    e['Variables'][2]['Name'] = 'sigma'
+    e['Variables'][2]['Precomputed Values'] = sigma
+
+    e['Solver']['Type'] = 'Executor'
+    e['Solver']['Executions Per Generation'] = 1000
+
+    results_path = '_korali_result_propagation'
+
+    e['Console Output']['Verbosity'] = 'Minimal'
+    e['File Output']['Path'] = results_path
+    e['Store Sample Information'] = True
+
+    k = korali.Engine()
+    k.run(e)
+
+    # read the samples from the produced file
+    with open(os.path.join(results_path, 'latest')) as f:
+        doc = json.load(f)
+
+    y = np.array([s['Evaluations'] for s in doc['Samples']])
+    sigma = np.array([s['sigma'] for s in doc['Samples']])
+
+    num_samples_per_x = 200
+
+    ysamples = np.random.normal(loc=y[:,:,np.newaxis], scale=sigma[:,np.newaxis,np.newaxis],
+                                size=(len(a), num_x, num_samples_per_x))
+
+    return x, ysamples
+
+
 
 if __name__ == '__main__':
+    x, ysamples = generate_samples_xy()
+
+    fig, ax = plt.subplots()
+
+    y_mean = np.mean(ysamples, axis=(0,2))
+    y_q05 = np.quantile(ysamples, axis=(0,2), q=0.05)
+    y_q95 = np.quantile(ysamples, axis=(0,2), q=0.95)
+
+    ax.fill_between(x, y_q05, y_q95, alpha=0.2)
+    ax.plot(x, y_mean)
 
     df = pd.read_csv("data.csv")
     x = df['x'].to_numpy()
     y = df['y'].to_numpy()
-
-    a, b, sigma = get_korali_samples(os.path.join("_korali_result", "latest"))
-
-    numx = 200
-    numy = 500
-
-    x_ = np.linspace(np.min(x), np.max(x), numx)
-    y_ = np.linspace(-7, 3, numy)
-
-    y_cdf = np.zeros((numx,numy))
-
-    for a_, b_, sigma_ in zip(a, b, sigma):
-        y_cdf += norm.cdf(y_[np.newaxis,:], loc=(a_*x_+b_)[:,np.newaxis], scale=sigma_)
-    y_cdf /= len(a)
-
-    y_median = y_[np.argmin(np.abs(y_cdf-0.5), axis=1).flatten()]
-    y_q05 = y_[np.argmin(np.abs(y_cdf-0.05), axis=1).flatten()]
-    y_q95 = y_[np.argmin(np.abs(y_cdf-0.95), axis=1).flatten()]
-
-    fig, ax = plt.subplots()
-    ax.fill_between(x_, y_q05, y_q95, alpha=0.2)
-    ax.plot(x_, y_median)
     ax.plot(x, y, '+k')
+
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
     ax.set_xlim(-1,1)
