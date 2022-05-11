@@ -23,7 +23,7 @@ def get_samples_posterior(filename):
 def generate_samples_xy():
     a, b, sigma = get_samples_posterior(os.path.join("_korali_result", "latest"))
     num_x = 100
-    x = np.linspace(-1, 1, num_x)
+    x = np.linspace(-1.2, 1.2, num_x)
 
     def model(ks):
         a, b, sigma = ks["Parameters"]
@@ -77,19 +77,22 @@ if __name__ == '__main__':
 
     fig, ax = plt.subplots()
 
-    y_mean = np.mean(ysamples, axis=(0,2))
-    y_q05 = np.quantile(ysamples, axis=(0,2), q=0.05)
-    y_q95 = np.quantile(ysamples, axis=(0,2), q=0.95)
 
-    ax.fill_between(x, y_q05, y_q95, alpha=0.2)
-    ax.plot(x, y_mean)
+    for p in [0.99, 0.90, 0.50]:
+        y_qlo = np.quantile(ysamples, axis=(0,2), q=0.5-p/2)
+        y_qhi = np.quantile(ysamples, axis=(0,2), q=0.5+p/2)
+        ax.fill_between(x, y_qlo, y_qhi, label=f"{100*p}% credible intervals")
+
+    y_mean = np.mean(ysamples, axis=(0,2))
+    ax.plot(x, y_mean, '--k', label='mean')
 
     df = pd.read_csv("data.csv")
     x = df['x'].to_numpy()
     y = df['y'].to_numpy()
-    ax.plot(x, y, '+k')
+    ax.plot(x, y, 'ok', label='data')
 
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
-    ax.set_xlim(-1,1)
+    ax.set_xlim(-1.2, 1.2)
+    ax.legend(frameon=False)
     plt.savefig("prediction.pdf", bbox_inches='tight', transparent=True)

@@ -11,7 +11,7 @@ if __name__ == '__main__':
     y = df['y'].to_numpy()
 
     fig, ax = plt.subplots()
-    ax.plot(x, y, '+k')
+    ax.plot(x, y, 'ok')
     ax.set_xlabel('$x$')
     ax.set_ylabel('$y$')
     plt.savefig("raw_data.pdf", bbox_inches='tight', transparent=True)
