@@ -6,6 +6,11 @@ import numpy as np
 from scipy.special import factorial
 
 def multi_rank_function(ks):
+    """
+    A dumb way to compute log(2) by maximizing -(exp(x)-2)**2
+    exp(x) is here computed through a taylor expansion in parallel.
+    This example is just here to illustrate the use of MPI with korali.
+    """
     comm = korali.getWorkerMPIComm()
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -19,14 +24,14 @@ def multi_rank_function(ks):
     start = rank * work_per_rank
     end = min([start + work_per_rank, ntot])
 
-    n = np.arange(start+1, end+1)
+    n = np.arange(start, end)
     local_expx = np.array([np.sum(x**n / factorial(n))])
 
     # gather the result with MPI
     expx = np.array([0.0])
     comm.Allreduce(local_expx, expx, op=MPI.SUM)
 
-    ks["F(x)"] = -(expx[0] - 5)**2
+    ks["F(x)"] = -(expx[0] - 2)**2
 
 
 if __name__ == '__main__':
