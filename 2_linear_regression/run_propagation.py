@@ -27,9 +27,11 @@ def generate_samples_xy():
 
     def model(ks):
         a, b, sigma = ks["Parameters"]
-        ks["sigma"] = sigma # Store
-        #ks["X"] = x.tolist()
         ks["Evaluations"] = (a * x + b).tolist()
+
+        # korali samples can store arbitrary data in addition to the required fields.
+        # here we store the sampled sigma for each sample.
+        ks["sigma"] = sigma
 
     e = korali.Experiment()
     e['Problem']['Type'] = 'Propagation'
