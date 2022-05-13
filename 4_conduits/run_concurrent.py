@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import argparse
 import korali
 import numpy as np
 import pandas as pd
+import time
 
 def load_data(filename: str):
     df = pd.read_csv(filename)
@@ -11,6 +13,11 @@ def load_data(filename: str):
     return x, y
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num-cores", type=int, default=1, help="the number of cores to use.")
+    args = parser.parse_args()
+    num_cores = args.num_cores
 
     e = korali.Experiment()
 
@@ -21,13 +28,14 @@ if __name__ == '__main__':
         y_pred = a * x + b
         ksample["Reference Evaluations"] = y_pred.tolist()
         ksample["Standard Deviation"] = len(y_pred) * [sigma]
+        time.sleep(0.1) # to mimick a more expensive model
+
+    e["Random Seed"] = 0xC0FFEE
 
     e["Problem"]["Type"] = "Bayesian/Reference"
     e["Problem"]["Likelihood Model"] = "Normal"
     e["Problem"]["Reference Data"] = y.tolist()
     e["Problem"]["Computational Model"] = model
-
-    # Configure the variables and their prior distributions
 
     e["Variables"][0]["Name"] = "a"
     e["Variables"][0]["Prior Distribution"] = "Prior a"
@@ -55,14 +63,14 @@ if __name__ == '__main__':
 
     # Configuring TMCMC parameters
     e["Solver"]["Type"] = "Sampler/TMCMC"
-    e["Solver"]["Population Size"] = 5000
+    e["Solver"]["Population Size"] = 100
 
     # Experiments need a Korali Engine object to be executed
     k = korali.Engine()
 
     # Setup concurrent conduit
     k["Conduit"]["Type"] = "Concurrent"
-    k["Conduit"]["Concurrent Jobs"] = 4
+    k["Conduit"]["Concurrent Jobs"] = num_cores
 
     # Run the optimization
     k.run(e)
