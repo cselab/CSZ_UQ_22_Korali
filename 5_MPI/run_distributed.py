@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import korali
-from mpi4py import MPI
+from mpi4py import MPI # The user is responsible to initialize MPI
 import numpy as np
 from scipy.special import factorial
 
@@ -11,7 +11,7 @@ def multi_rank_function(ks):
     exp(x) is here computed through a taylor expansion in parallel.
     This example is just here to illustrate the use of MPI with korali.
     """
-    comm = korali.getWorkerMPIComm()
+    comm = korali.getWorkerMPIComm() # sub communicator for this particular sample
     rank = comm.Get_rank()
     size = comm.Get_size()
 
@@ -36,18 +36,15 @@ def multi_rank_function(ks):
 
 if __name__ == '__main__':
 
-    # The optimization problem is described in a korali Experiment object
     e = korali.Experiment()
 
     e["Problem"]["Type"] = "Optimization"
     e["Problem"]["Objective Function"] = multi_rank_function
 
-    # Defining the problem's variables.
     e["Variables"][0]["Name"] = "x"
     e["Variables"][0]["Initial Value"] = 0.0
     e["Variables"][0]["Initial Standard Deviation"] = 1.0
 
-    # Configuring CMA-ES parameters
     e["Solver"]["Type"] = "Optimizer/CMAES"
     e["Solver"]["Population Size"] = 16
     e["Solver"]["Termination Criteria"]["Min Value Difference Threshold"] = 1e-8
@@ -55,7 +52,7 @@ if __name__ == '__main__':
 
     # Experiments need a Korali Engine object to be executed
     k = korali.Engine()
-    k.setMPIComm(MPI.COMM_WORLD)
+    k.setMPIComm(MPI.COMM_WORLD) # pass the communicator to korali
     k["Conduit"]["Type"] = "Distributed"
     k["Conduit"]["Ranks Per Worker"] = 2
 
