@@ -209,6 +209,7 @@ if __name__ == '__main__':
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
         ax.set_xlim(-5.2, 5.2)
+        ax.set_ylim(-30, 60)
         ax.legend()
         plt.savefig(f"prediction_{i}.pdf", bbox_inches='tight', transparent=True)
         plt.close()
