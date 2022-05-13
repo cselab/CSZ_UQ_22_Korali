@@ -28,12 +28,12 @@ def make_experiment_0(x, y):
 
     e["Distributions"] = [{"Name": "Prior a",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -40.0,
+                           "Maximum": +40.0},
                           {"Name": "Prior sigma",
                            "Type": "Univariate/Uniform",
                            "Minimum": 0.0,
-                           "Maximum": 5.0}]
+                           "Maximum": 40.0}]
 
     e["Solver"]["Type"] = "Sampler/TMCMC"
     e["Solver"]["Population Size"] = 5000
@@ -62,16 +62,16 @@ def make_experiment_1(x, y):
 
     e["Distributions"] = [{"Name": "Prior a",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior b",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -40.0,
+                           "Maximum": +40.0},
                           {"Name": "Prior sigma",
                            "Type": "Univariate/Uniform",
                            "Minimum": 0.0,
-                           "Maximum": 5.0}]
+                           "Maximum": 40.0}]
 
     e["Solver"]["Type"] = "Sampler/TMCMC"
     e["Solver"]["Population Size"] = 5000
@@ -101,20 +101,20 @@ def make_experiment_2(x, y):
 
     e["Distributions"] = [{"Name": "Prior a",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior b",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior c",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -40.0,
+                           "Maximum": +40.0},
                           {"Name": "Prior sigma",
                            "Type": "Univariate/Uniform",
                            "Minimum": 0.0,
-                           "Maximum": 5.0}]
+                           "Maximum": 40.0}]
 
     e["Solver"]["Type"] = "Sampler/TMCMC"
     e["Solver"]["Population Size"] = 5000
@@ -145,24 +145,24 @@ def make_experiment_3(x, y):
 
     e["Distributions"] = [{"Name": "Prior a",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior b",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior c",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -10.0,
+                           "Maximum": +10.0},
                           {"Name": "Prior d",
                            "Type": "Univariate/Uniform",
-                           "Minimum": -5.0,
-                           "Maximum": +5.0},
+                           "Minimum": -40.0,
+                           "Maximum": +40.0},
                           {"Name": "Prior sigma",
                            "Type": "Univariate/Uniform",
                            "Minimum": 0.0,
-                           "Maximum": 5.0}]
+                           "Maximum": 40.0}]
 
     e["Solver"]["Type"] = "Sampler/TMCMC"
     e["Solver"]["Population Size"] = 5000
@@ -188,4 +188,5 @@ if __name__ == '__main__':
     k["Conduit"]["Concurrent Jobs"] = 4
 
     # Run the optimization
-    k.run(experiments)
+    for e in experiments:
+        k.run(e)
