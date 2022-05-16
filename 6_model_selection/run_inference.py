@@ -187,6 +187,6 @@ if __name__ == '__main__':
     k["Conduit"]["Type"] = "Concurrent"
     k["Conduit"]["Concurrent Jobs"] = 4
 
-    # Run the optimization
+    # Run the inference
     for e in experiments:
         k.run(e)
